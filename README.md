@@ -9,7 +9,7 @@
 
 ## Description
 
-- This is a website where you can see the reviews for some restaurants.
+- This is a website where you can see reviews for some restaurants.
 
 ## Setup
 
