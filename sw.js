@@ -55,39 +55,52 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", event => {
   console.log("[ServiceWorker] Fetch");
 
-  event.respondWith(
-    caches
-      .match(event.request)
+  if (event.request.url.includes("maps")) {
+    event.respondWith(
+      fetch(event.request)
+        .then(res => res)
+        .catch(error => {
+          console.log(
+            "[ServiceWorker] Error Fetching & Caching New Data",
+            error
+          );
+        })
+    );
+  } else {
+    event.respondWith(
+      caches
+        .match(event.request)
 
-      .then(function(response) {
-        if (response) {
-          console.log("[ServiceWorker] Found in Cache");
-          return response;
-        }
+        .then(function(response) {
+          if (response) {
+            console.log("[ServiceWorker] Found in Cache");
+            return response;
+          }
 
-        var requestClone = event.request.clone();
-        return fetch(requestClone)
-          .then(response => {
-            if (!response) {
-              console.log("[ServiceWorker] No response from fetch ");
-              return response;
-            }
+          var requestClone = event.request.clone();
+          return fetch(requestClone)
+            .then(response => {
+              if (!response) {
+                console.log("[ServiceWorker] No response from fetch ");
+                return response;
+              }
 
-            var responseClone = response.clone();
+              var responseClone = response.clone();
 
-            caches.open(cacheName).then(cache => {
-              cache.put(event.request, responseClone);
-              console.log("[ServiceWorker] New Data Cached");
+              caches.open(cacheName).then(cache => {
+                cache.put(event.request, responseClone);
+                console.log("[ServiceWorker] New Data Cached");
 
-              return response;
+                return response;
+              });
+            })
+            .catch(error => {
+              console.log(
+                "[ServiceWorker] Error Fetching & Caching New Data",
+                error
+              );
             });
-          })
-          .catch(error => {
-            console.log(
-              "[ServiceWorker] Error Fetching & Caching New Data",
-              error
-            );
-          });
-      })
-  );
+        })
+    );
+  }
 });
